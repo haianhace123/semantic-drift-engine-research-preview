@@ -1,0 +1,408 @@
+services:
+  db:
+    image: pgvector/pgvector:pg15@sha256:a947c45cdc5906a1bc951f20a8709e321256343ee0f251e4ae00b5e7def4e6da
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-semantic_drift}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-semantic_drift}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  integration_downstream_db:
+    image: pgvector/pgvector:pg15@sha256:a947c45cdc5906a1bc951f20a8709e321256343ee0f251e4ae00b5e7def4e6da
+    profiles:
+      - integration
+    environment:
+      POSTGRES_DB: downstream_test
+      POSTGRES_USER: downstream_test
+      POSTGRES_PASSWORD: downstream_test
+    expose:
+      - "5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U downstream_test -d downstream_test",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  redis:
+    image: redis:7@sha256:c6eabf748fc7a61dbb5a705c78bcf3d6377b1127a97d0ce965c11c44ba46896f
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+    volumes:
+      - redis_data:/data
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  runtime_volume_init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    user: "0:0"
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        chown -R 10001:10001 /app/backups /app/data
+    volumes:
+      - backup_data:/app/backups
+      - snapshot_data:/app/data
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      SDE_EMAIL_WORKER_EXPECTED: ${SDE_EMAIL_WORKER_EXPECTED:-false}
+      # These flags mirror the vector_worker command's deployment intent.
+      # They are informational for the admin-only Operations API.
+      VECTOR_WORKER_EMBEDDINGS_ENABLED: ${VECTOR_WORKER_EMBEDDINGS_ENABLED:-false}
+      VECTOR_WORKER_ANALYSIS_ENABLED: ${VECTOR_WORKER_ANALYSIS_ENABLED:-true}
+      VECTOR_WORKER_RISK_SCORING_ENABLED: ${VECTOR_WORKER_RISK_SCORING_ENABLED:-true}
+      VECTOR_WORKER_PATTERN_DETECTION_ENABLED: ${VECTOR_WORKER_PATTERN_DETECTION_ENABLED:-true}
+      VECTOR_WORKER_ANOMALY_DETECTION_ENABLED: ${VECTOR_WORKER_ANOMALY_DETECTION_ENABLED:-true}
+    command:
+      - uvicorn
+      - src.main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+      - --workers
+      - "${UVICORN_WORKERS:-2}"
+      - --proxy-headers
+      - --forwarded-allow-ips
+      - "${FORWARDED_ALLOW_IPS:-127.0.0.1}"
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      # Customer snapshot evidence is needed for authenticated inspection.
+      # Full-database backup archives are not needed by the public API.
+      - snapshot_data:/app/data
+    depends_on:
+      runtime_volume_init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # An operator-only, ephemeral job. The API and regular workers must never
+  # mount the volume holding entire-database archives.
+  backup_maintenance:
+    profiles:
+      - maintenance
+    # Use only a pre-built, operator-approved release image. Never implicitly
+    # build or pull during backup maintenance or its read-only preflight.
+    image: ${SDE_MAINTENANCE_IMAGE:-semantic_drift_engine-api:latest}
+    pull_policy: never
+    restart: "no"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      BACKUP_DIR: /app/backups
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+    command:
+      - python
+      - -m
+      - scripts.backup_database
+    volumes:
+      - backup_data:/app/backups
+    # No depends_on: maintenance must not start or recreate db or trigger
+    # runtime_volume_init, which recursively chowns live data volumes.
+
+  # Snapshot-aware operator maintenance. Never available to public API/workers.
+  # Safe default is plan-only; execution requires a stopped-writer window and
+  # both explicit flags. Snapshots are mounted read-only.
+  knowledge_backup_maintenance:
+    profiles:
+      - maintenance
+    # Use only a pre-built, operator-approved release image. Never implicitly
+    # build or pull during backup maintenance or its read-only preflight.
+    image: ${SDE_MAINTENANCE_IMAGE:-semantic_drift_engine-api:latest}
+    pull_policy: never
+    restart: "no"
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      BACKUP_DIR: /app/backups
+      SNAPSHOT_ROOT: /app/data/raw
+    command:
+      - python
+      - -m
+      - scripts.backup_knowledge_state
+    volumes:
+      - backup_data:/app/backups
+      - snapshot_data:/app/data:ro
+    # No depends_on: maintenance must not start or recreate db or trigger
+    # runtime_volume_init, which recursively chowns live data volumes.
+
+  vector_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+
+      VECTOR_WORKER_SNAPSHOT_LIMIT: ${VECTOR_WORKER_SNAPSHOT_LIMIT:-10}
+      VECTOR_WORKER_EVENT_LIMIT: ${VECTOR_WORKER_EVENT_LIMIT:-10}
+      VECTOR_WORKER_RISK_LIMIT: ${VECTOR_WORKER_RISK_LIMIT:-10}
+      VECTOR_WORKER_PATTERN_LIMIT: ${VECTOR_WORKER_PATTERN_LIMIT:-10}
+      VECTOR_WORKER_ANOMALY_LIMIT: ${VECTOR_WORKER_ANOMALY_LIMIT:-10}
+      VECTOR_WORKER_MAX_ATTEMPTS: ${VECTOR_WORKER_MAX_ATTEMPTS:-3}
+      VECTOR_WORKER_POLL_SECONDS: ${VECTOR_WORKER_POLL_SECONDS:-10}
+
+      # Safety switches.
+      #
+      # Embeddings stay disabled by default because the embedding
+      # provider may be unavailable or have no remaining quota.
+      #
+      # Vector analysis and risk scoring are deterministic downstream
+      # stages and only consume evidence already stored in PostgreSQL.
+      VECTOR_WORKER_EMBEDDINGS_ENABLED: ${VECTOR_WORKER_EMBEDDINGS_ENABLED:-false}
+      VECTOR_WORKER_ANALYSIS_ENABLED: ${VECTOR_WORKER_ANALYSIS_ENABLED:-true}
+      VECTOR_WORKER_RISK_SCORING_ENABLED: ${VECTOR_WORKER_RISK_SCORING_ENABLED:-true}
+      VECTOR_WORKER_PATTERN_DETECTION_ENABLED: ${VECTOR_WORKER_PATTERN_DETECTION_ENABLED:-true}
+      VECTOR_WORKER_ANOMALY_DETECTION_ENABLED: ${VECTOR_WORKER_ANOMALY_DETECTION_ENABLED:-true}
+
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+
+        EXTRA_ARGS=""
+
+        if [ "$${VECTOR_WORKER_EMBEDDINGS_ENABLED}" != "true" ]; then
+          EXTRA_ARGS="$${EXTRA_ARGS} --skip-embeddings"
+        fi
+
+        if [ "$${VECTOR_WORKER_ANALYSIS_ENABLED}" != "true" ]; then
+          EXTRA_ARGS="$${EXTRA_ARGS} --skip-analysis"
+        fi
+
+        if [ "$${VECTOR_WORKER_RISK_SCORING_ENABLED}" != "true" ]; then
+          EXTRA_ARGS="$${EXTRA_ARGS} --skip-risk-scoring"
+        fi
+
+        if [ "$${VECTOR_WORKER_PATTERN_DETECTION_ENABLED}" != "true" ]; then
+          EXTRA_ARGS="$${EXTRA_ARGS} --skip-pattern-detection"
+        fi
+
+        if [ "$${VECTOR_WORKER_ANOMALY_DETECTION_ENABLED}" != "true" ]; then
+          EXTRA_ARGS="$${EXTRA_ARGS} --skip-anomaly-detection"
+        fi
+
+        exec python -m scripts.vector_worker \
+          --snapshot-limit "$${VECTOR_WORKER_SNAPSHOT_LIMIT}" \
+          --event-limit "$${VECTOR_WORKER_EVENT_LIMIT}" \
+          --risk-limit "$${VECTOR_WORKER_RISK_LIMIT}" \
+          --pattern-limit "$${VECTOR_WORKER_PATTERN_LIMIT}" \
+          --anomaly-limit "$${VECTOR_WORKER_ANOMALY_LIMIT}" \
+          --max-attempts "$${VECTOR_WORKER_MAX_ATTEMPTS}" \
+          --poll-seconds "$${VECTOR_WORKER_POLL_SECONDS}" \
+          $${EXTRA_ARGS}
+
+    volumes:
+      - snapshot_data:/app/data
+    depends_on:
+      runtime_volume_init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  semantic_recovery_worker:
+    profiles:
+      - semantic-recovery
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      SEMANTIC_RECOVERY_LIMIT: ${SEMANTIC_RECOVERY_LIMIT:-5}
+      SEMANTIC_RECOVERY_RECONCILE_MISSING: ${SEMANTIC_RECOVERY_RECONCILE_MISSING:-0}
+      SEMANTIC_RECOVERY_MAX_ATTEMPTS: ${SEMANTIC_RECOVERY_MAX_ATTEMPTS:-3}
+      SEMANTIC_RECOVERY_POLL_SECONDS: ${SEMANTIC_RECOVERY_POLL_SECONDS:-30}
+    command:
+      - /bin/sh
+      - -c
+      - |
+        GAP_ARG=""
+        if [ "$${SEMANTIC_RECOVERY_RECONCILE_MISSING}" = "1" ]; then
+          GAP_ARG="--reconcile-missing"
+        fi
+        exec python -m scripts.semantic_analysis_recovery_worker \
+          --execute --loop $${GAP_ARG} \
+          --limit "$${SEMANTIC_RECOVERY_LIMIT}" \
+          --max-attempts "$${SEMANTIC_RECOVERY_MAX_ATTEMPTS}" \
+          --poll-seconds "$${SEMANTIC_RECOVERY_POLL_SECONDS}"
+    volumes:
+      - snapshot_data:/app/data
+    depends_on:
+      runtime_volume_init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+
+  alert_delivery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+
+      ALERT_DELIVERY_WORKER_POLL_SECONDS: ${ALERT_DELIVERY_WORKER_POLL_SECONDS:-2}
+      ALERT_DELIVERY_WORKER_BATCH_SIZE: ${ALERT_DELIVERY_WORKER_BATCH_SIZE:-10}
+      ALERT_DELIVERY_WORKER_MAX_ATTEMPTS: ${ALERT_DELIVERY_WORKER_MAX_ATTEMPTS:-5}
+      ALERT_DELIVERY_WORKER_CLAIM_TIMEOUT_SECONDS: ${ALERT_DELIVERY_WORKER_CLAIM_TIMEOUT_SECONDS:-300}
+      ALERT_DELIVERY_WORKER_RETRY_BASE_SECONDS: ${ALERT_DELIVERY_WORKER_RETRY_BASE_SECONDS:-30}
+      ALERT_DELIVERY_WORKER_RETRY_MAX_SECONDS: ${ALERT_DELIVERY_WORKER_RETRY_MAX_SECONDS:-3600}
+      ALERT_DELIVERY_WORKER_HTTP_TIMEOUT: ${ALERT_DELIVERY_WORKER_HTTP_TIMEOUT:-10}
+
+    command:
+      - python
+      - -m
+      - scripts.alert_delivery_worker
+
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  crawler_scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      CRAWLER_SCHEDULER_POLL_SECONDS: ${CRAWLER_SCHEDULER_POLL_SECONDS:-5}
+      USER_AGENT: ${USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36}
+      REQUEST_TIMEOUT: ${REQUEST_TIMEOUT:-30}
+      MAX_RETRIES: ${MAX_RETRIES:-3}
+      # The crawler invokes the semantic detector after persisting a changed snapshot.
+      # Pass only its required provider settings, not the complete .env file.
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-flash}
+      DEEPSEEK_MAX_INPUT_CHARS: ${DEEPSEEK_MAX_INPUT_CHARS:-30000}
+      DEEPSEEK_TIMEOUT_SECONDS: ${DEEPSEEK_TIMEOUT_SECONDS:-60}
+
+    command:
+      - python
+      - -m
+      - scripts.run_crawler
+
+    # Snapshot paths persisted in PostgreSQL must resolve in API and workers.
+    # Without this mount, files stay in the scheduler container's writable layer
+    # and disappear when that container is replaced.
+    volumes:
+      - snapshot_data:/app/data
+
+    depends_on:
+      runtime_volume_init:
+        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+
+  lineage_invalidation_executor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    stop_grace_period: 30s
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/semantic_drift}
+      SDE_DOWNSTREAM_DATABASE_URLS: ${SDE_DOWNSTREAM_DATABASE_URLS:-{}}
+      LINEAGE_INVALIDATION_EXECUTOR_POLL_SECONDS: ${LINEAGE_INVALIDATION_EXECUTOR_POLL_SECONDS:-5}
+
+    command:
+      - python
+      - -m
+      - scripts.run_lineage_invalidation_executor
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  email_worker:
+    profiles:
+      - email
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+
+    command:
+      - python
+      - -m
+      - scripts.email_worker
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  backup_data:
+  snapshot_data:

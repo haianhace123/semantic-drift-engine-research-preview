@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "case_id": "pricing_price_tenfold",
+      "domain": "pricing",
+      "expected_material": true,
+      "old_text": "The Standard plan costs USD 19 per month. Payment is due on the first day of each month.",
+      "new_text": "The Standard plan costs USD 190 per month. Payment is due on the first day of each month."
+    },
+    {
+      "case_id": "pricing_tax_exclusion",
+      "domain": "pricing",
+      "expected_material": true,
+      "old_text": "The quoted price excludes VAT. Applicable taxes are added at checkout.",
+      "new_text": "The quoted price includes VAT. Applicable taxes are not added at checkout."
+    },
+    {
+      "case_id": "pricing_equivalent_wording",
+      "domain": "pricing",
+      "expected_material": false,
+      "old_text": "The subscription fee is USD 49 each month, payable monthly.",
+      "new_text": "Customers pay a monthly subscription charge of $49 USD."
+    },
+    {
+      "case_id": "pricing_equivalent_format",
+      "domain": "pricing",
+      "expected_material": false,
+      "old_text": "Enterprise onboarding costs USD 1,000 as a one-time fee.",
+      "new_text": "A single enterprise onboarding charge of US$1,000 applies."
+    },
+    {
+      "case_id": "eligibility_refund_window",
+      "domain": "eligibility",
+      "expected_material": true,
+      "old_text": "Customers can request a refund up to 30 calendar days after purchase.",
+      "new_text": "Customers can request a refund up to 3 calendar days after purchase."
+    },
+    {
+      "case_id": "eligibility_geographic_scope",
+      "domain": "eligibility",
+      "expected_material": true,
+      "old_text": "This offer is available only to customers residing in the United States.",
+      "new_text": "This offer is available to customers residing in the United States or Canada."
+    },
+    {
+      "case_id": "eligibility_equivalent_conjunction",
+      "domain": "eligibility",
+      "expected_material": false,
+      "old_text": "A buyer is eligible when the account is active and the invoice is fully paid.",
+      "new_text": "Eligibility requires both an active account and payment of the invoice in full."
+    },
+    {
+      "case_id": "eligibility_equivalent_reorder",
+      "domain": "eligibility",
+      "expected_material": false,
+      "old_text": "Applicants must be at least 18 years old. Applicants must live in an eligible region.",
+      "new_text": "Applicants must live in an eligible region. They must also be 18 or older."
+    },
+    {
+      "case_id": "privacy_sharing_negation",
+      "domain": "privacy",
+      "expected_material": true,
+      "old_text": "Personal data is not sold to advertising partners. Customers may opt out of analytics.",
+      "new_text": "Personal data is sold to advertising partners. Customers may opt out of analytics."
+    },
+    {
+      "case_id": "privacy_retention_period",
+      "domain": "privacy",
+      "expected_material": true,
+      "old_text": "Account records are deleted 30 days after closure unless legally required.",
+      "new_text": "Account records are kept indefinitely after closure unless legally required."
+    },
+    {
+      "case_id": "privacy_equivalent_retention",
+      "domain": "privacy",
+      "expected_material": false,
+      "old_text": "We erase account data within 30 days after account termination.",
+      "new_text": "No later than 30 days following termination of an account, its data is deleted."
+    },
+    {
+      "case_id": "privacy_equivalent_prohibition",
+      "domain": "privacy",
+      "expected_material": false,
+      "old_text": "We do not disclose customer records to third-party advertisers.",
+      "new_text": "Customer records are never shared with external advertising firms."
+    },
+    {
+      "case_id": "security_mfa_requirement",
+      "domain": "security",
+      "expected_material": true,
+      "old_text": "Multi-factor authentication is required for every administrator sign-in.",
+      "new_text": "Multi-factor authentication is optional for administrator sign-ins."
+    },
+    {
+      "case_id": "security_audit_retention",
+      "domain": "security",
+      "expected_material": true,
+      "old_text": "Security audit logs are retained for 180 days and can be exported by administrators.",
+      "new_text": "Security audit logs are retained for 7 days and can be exported by administrators."
+    },
+    {
+      "case_id": "security_equivalent_mfa",
+      "domain": "security",
+      "expected_material": false,
+      "old_text": "Administrator logins must use a second authentication factor.",
+      "new_text": "A second factor of authentication is mandatory when administrators sign in."
+    },
+    {
+      "case_id": "security_equivalent_transport",
+      "domain": "security",
+      "expected_material": false,
+      "old_text": "All traffic between the client and the service is encrypted in transit.",
+      "new_text": "Data sent between the client and service is protected by transport encryption."
+    },
+    {
+      "case_id": "sla_guarantee_drop",
+      "domain": "sla",
+      "expected_material": true,
+      "old_text": "Monthly availability of at least 99.95% is guaranteed.",
+      "new_text": "Monthly availability of at least 99.0% is guaranteed."
+    },
+    {
+      "case_id": "sla_credit_removal",
+      "domain": "sla",
+      "expected_material": true,
+      "old_text": "If uptime drops below 99.9%, affected customers receive service credits.",
+      "new_text": "If uptime drops below 99.9%, affected customers do not receive service credits."
+    },
+    {
+      "case_id": "sla_equivalent_rewording",
+      "domain": "sla",
+      "expected_material": false,
+      "old_text": "The service guarantees 99.9% uptime over each calendar month.",
+      "new_text": "For every calendar month, service availability is guaranteed to be 99.9%."
+    },
+    {
+      "case_id": "sla_equivalent_conditions",
+      "domain": "sla",
+      "expected_material": false,
+      "old_text": "Planned maintenance announced at least 48 hours in advance is excluded from uptime calculations.",
+      "new_text": "Uptime calculations exclude scheduled maintenance when notice is given 48 hours or more beforehand."
+    },
+    {
+      "case_id": "policy_negative_exception",
+      "domain": "policy",
+      "expected_material": true,
+      "old_text": "Members may cancel any time except during an active billing dispute.",
+      "new_text": "Members may cancel any time, including during an active billing dispute."
+    },
+    {
+      "case_id": "policy_long_document_tail",
+      "domain": "policy",
+      "expected_material": true,
+      "old_text": "Changes to service terms must be announced 30 days in advance.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nCustomers may export their data within 90 days of termination.",
+      "new_text": "Changes to service terms must be announced 30 days in advance.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nAll standard terms remain in force.\nCustomers may export their data within 9 days of termination."
+    },
+    {
+      "case_id": "policy_equivalent_conditional",
+      "domain": "policy",
+      "expected_material": false,
+      "old_text": "Where the customer has submitted a valid written request, the supplier must provide an export.",
+      "new_text": "The supplier is obliged to provide an export if the customer submits a valid request in writing."
+    },
+    {
+      "case_id": "policy_equivalent_reorder",
+      "domain": "policy",
+      "expected_material": false,
+      "old_text": "During an outage, emergency support is available by telephone. Email support remains available at all times.",
+      "new_text": "Email support is always available. In the event of an outage, customers can call emergency support."
+    }
+  ]
+}

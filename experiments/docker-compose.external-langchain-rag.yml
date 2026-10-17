@@ -1,0 +1,22 @@
+services:
+  external_rag_db:
+    image: pgvector/pgvector:pg15
+    environment:
+      POSTGRES_DB: external_rag
+      POSTGRES_USER: external_rag
+      POSTGRES_PASSWORD: external_rag_dev
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U external_rag -d external_rag
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - external_rag_postgres_data:/var/lib/postgresql/data
+      - ./external_langchain_rag_init.sql:/docker-entrypoint-initdb.d/001-vector.sql:ro
+
+volumes:
+  external_rag_postgres_data:

@@ -1,0 +1,646 @@
+[
+  {
+    "id": "cal_dependency_path_control_001",
+    "pair_id": "cal_dependency_path_001",
+    "split": "calibration",
+    "category": "dependency_path",
+    "domain": "service_operations",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["policy", "service", "workflow", "customer_action", "telemetry"],
+      "edges": [
+        ["policy", "service"],
+        ["service", "workflow"],
+        ["workflow", "customer_action"]
+      ]
+    },
+    "after": {
+      "entities": ["policy", "service", "workflow", "customer_action", "telemetry"],
+      "edges": [
+        ["policy", "service"],
+        ["service", "workflow"],
+        ["workflow", "customer_action"],
+        ["service", "telemetry"]
+      ]
+    }
+  },
+  {
+    "id": "cal_dependency_path_mutation_001",
+    "pair_id": "cal_dependency_path_001",
+    "split": "calibration",
+    "category": "dependency_path",
+    "domain": "service_operations",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["policy", "service", "workflow", "customer_action", "telemetry"],
+      "edges": [
+        ["policy", "service"],
+        ["service", "workflow"],
+        ["workflow", "customer_action"]
+      ]
+    },
+    "after": {
+      "entities": ["policy", "service", "workflow", "customer_action", "telemetry"],
+      "edges": [
+        ["policy", "service"],
+        ["workflow", "customer_action"],
+        ["service", "telemetry"]
+      ]
+    }
+  },
+
+  {
+    "id": "cal_authority_route_control_001",
+    "pair_id": "cal_authority_route_001",
+    "split": "calibration",
+    "category": "authority_route",
+    "domain": "incident_response",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["incident", "security_lead", "closure", "audit", "telemetry"],
+      "edges": [
+        ["incident", "security_lead"],
+        ["security_lead", "closure"],
+        ["closure", "audit"]
+      ]
+    },
+    "after": {
+      "entities": ["incident", "security_lead", "closure", "audit", "telemetry"],
+      "edges": [
+        ["incident", "security_lead"],
+        ["security_lead", "closure"],
+        ["closure", "audit"],
+        ["incident", "telemetry"]
+      ]
+    }
+  },
+  {
+    "id": "cal_authority_route_mutation_001",
+    "pair_id": "cal_authority_route_001",
+    "split": "calibration",
+    "category": "authority_route",
+    "domain": "incident_response",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["incident", "security_lead", "closure", "audit", "telemetry"],
+      "edges": [
+        ["incident", "security_lead"],
+        ["security_lead", "closure"],
+        ["closure", "audit"]
+      ]
+    },
+    "after": {
+      "entities": ["incident", "security_lead", "closure", "audit", "telemetry"],
+      "edges": [
+        ["incident", "closure"],
+        ["security_lead", "closure"],
+        ["closure", "audit"]
+      ]
+    }
+  },
+
+  {
+    "id": "cal_security_gate_control_001",
+    "pair_id": "cal_security_gate_001",
+    "split": "calibration",
+    "category": "control_bypass",
+    "domain": "vendor_security",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["vendor", "security_review", "credential", "production", "audit"],
+      "edges": [
+        ["vendor", "security_review"],
+        ["security_review", "credential"],
+        ["credential", "production"]
+      ]
+    },
+    "after": {
+      "entities": ["vendor", "security_review", "credential", "production", "audit"],
+      "edges": [
+        ["vendor", "security_review"],
+        ["security_review", "credential"],
+        ["credential", "production"],
+        ["security_review", "audit"]
+      ]
+    }
+  },
+  {
+    "id": "cal_security_gate_mutation_001",
+    "pair_id": "cal_security_gate_001",
+    "split": "calibration",
+    "category": "control_bypass",
+    "domain": "vendor_security",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["vendor", "security_review", "credential", "production", "audit"],
+      "edges": [
+        ["vendor", "security_review"],
+        ["security_review", "credential"],
+        ["credential", "production"]
+      ]
+    },
+    "after": {
+      "entities": ["vendor", "security_review", "credential", "production", "audit"],
+      "edges": [
+        ["vendor", "credential"],
+        ["credential", "production"],
+        ["security_review", "audit"]
+      ]
+    }
+  },
+
+  {
+    "id": "cal_propagation_control_001",
+    "pair_id": "cal_propagation_001",
+    "split": "calibration",
+    "category": "propagation_change",
+    "domain": "data_platform",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["schema", "index", "agent", "workflow", "metrics"],
+      "edges": [
+        ["schema", "index"],
+        ["index", "agent"],
+        ["agent", "workflow"]
+      ]
+    },
+    "after": {
+      "entities": ["schema", "index", "agent", "workflow", "metrics"],
+      "edges": [
+        ["schema", "index"],
+        ["index", "agent"],
+        ["agent", "workflow"],
+        ["index", "metrics"]
+      ]
+    }
+  },
+  {
+    "id": "cal_propagation_mutation_001",
+    "pair_id": "cal_propagation_001",
+    "split": "calibration",
+    "category": "propagation_change",
+    "domain": "data_platform",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["schema", "index", "agent", "workflow", "metrics"],
+      "edges": [
+        ["schema", "index"],
+        ["index", "agent"],
+        ["agent", "workflow"]
+      ]
+    },
+    "after": {
+      "entities": ["schema", "index", "agent", "workflow", "metrics"],
+      "edges": [
+        ["schema", "index"],
+        ["agent", "workflow"],
+        ["index", "metrics"]
+      ]
+    }
+  },
+
+  {
+    "id": "cal_approval_chain_control_001",
+    "pair_id": "cal_approval_chain_001",
+    "split": "calibration",
+    "category": "approval_chain",
+    "domain": "payment_operations",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["refund", "finance", "approval", "payment", "audit"],
+      "edges": [
+        ["refund", "finance"],
+        ["finance", "approval"],
+        ["approval", "payment"]
+      ]
+    },
+    "after": {
+      "entities": ["refund", "finance", "approval", "payment", "audit"],
+      "edges": [
+        ["refund", "finance"],
+        ["finance", "approval"],
+        ["approval", "payment"],
+        ["approval", "audit"]
+      ]
+    }
+  },
+  {
+    "id": "cal_approval_chain_mutation_001",
+    "pair_id": "cal_approval_chain_001",
+    "split": "calibration",
+    "category": "approval_chain",
+    "domain": "payment_operations",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["refund", "finance", "approval", "payment", "audit"],
+      "edges": [
+        ["refund", "finance"],
+        ["finance", "approval"],
+        ["approval", "payment"]
+      ]
+    },
+    "after": {
+      "entities": ["refund", "finance", "approval", "payment", "audit"],
+      "edges": [
+        ["refund", "payment"],
+        ["finance", "approval"],
+        ["approval", "audit"]
+      ]
+    }
+  },
+
+  {
+    "id": "cal_dependency_rewire_control_001",
+    "pair_id": "cal_dependency_rewire_001",
+    "split": "calibration",
+    "category": "dependency_rewire",
+    "domain": "software_delivery",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["source", "build", "scan", "release", "telemetry"],
+      "edges": [
+        ["source", "build"],
+        ["build", "scan"],
+        ["scan", "release"]
+      ]
+    },
+    "after": {
+      "entities": ["source", "build", "scan", "release", "telemetry"],
+      "edges": [
+        ["source", "build"],
+        ["build", "scan"],
+        ["scan", "release"],
+        ["build", "telemetry"]
+      ]
+    }
+  },
+  {
+    "id": "cal_dependency_rewire_mutation_001",
+    "pair_id": "cal_dependency_rewire_001",
+    "split": "calibration",
+    "category": "dependency_rewire",
+    "domain": "software_delivery",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["source", "build", "scan", "release", "telemetry"],
+      "edges": [
+        ["source", "build"],
+        ["build", "scan"],
+        ["scan", "release"]
+      ]
+    },
+    "after": {
+      "entities": ["source", "build", "scan", "release", "telemetry"],
+      "edges": [
+        ["source", "build"],
+        ["build", "release"],
+        ["scan", "telemetry"]
+      ]
+    }
+  },
+
+  {
+    "id": "eval_access_path_control_001",
+    "pair_id": "eval_access_path_001",
+    "split": "evaluation",
+    "category": "dependency_path",
+    "domain": "identity_security",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["user", "mfa", "session", "privileged_api", "audit"],
+      "edges": [
+        ["user", "mfa"],
+        ["mfa", "session"],
+        ["session", "privileged_api"]
+      ]
+    },
+    "after": {
+      "entities": ["user", "mfa", "session", "privileged_api", "audit"],
+      "edges": [
+        ["user", "mfa"],
+        ["mfa", "session"],
+        ["session", "privileged_api"],
+        ["session", "audit"]
+      ]
+    }
+  },
+  {
+    "id": "eval_access_path_mutation_001",
+    "pair_id": "eval_access_path_001",
+    "split": "evaluation",
+    "category": "dependency_path",
+    "domain": "identity_security",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["user", "mfa", "session", "privileged_api", "audit"],
+      "edges": [
+        ["user", "mfa"],
+        ["mfa", "session"],
+        ["session", "privileged_api"]
+      ]
+    },
+    "after": {
+      "entities": ["user", "mfa", "session", "privileged_api", "audit"],
+      "edges": [
+        ["user", "session"],
+        ["session", "privileged_api"],
+        ["mfa", "audit"]
+      ]
+    }
+  },
+
+  {
+    "id": "eval_backup_path_control_001",
+    "pair_id": "eval_backup_path_001",
+    "split": "evaluation",
+    "category": "propagation_change",
+    "domain": "disaster_recovery",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["database", "backup", "replica", "recovery", "metrics"],
+      "edges": [
+        ["database", "backup"],
+        ["backup", "replica"],
+        ["replica", "recovery"]
+      ]
+    },
+    "after": {
+      "entities": ["database", "backup", "replica", "recovery", "metrics"],
+      "edges": [
+        ["database", "backup"],
+        ["backup", "replica"],
+        ["replica", "recovery"],
+        ["backup", "metrics"]
+      ]
+    }
+  },
+  {
+    "id": "eval_backup_path_mutation_001",
+    "pair_id": "eval_backup_path_001",
+    "split": "evaluation",
+    "category": "propagation_change",
+    "domain": "disaster_recovery",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["database", "backup", "replica", "recovery", "metrics"],
+      "edges": [
+        ["database", "backup"],
+        ["backup", "replica"],
+        ["replica", "recovery"]
+      ]
+    },
+    "after": {
+      "entities": ["database", "backup", "replica", "recovery", "metrics"],
+      "edges": [
+        ["database", "backup"],
+        ["replica", "recovery"],
+        ["backup", "metrics"]
+      ]
+    }
+  },
+
+  {
+    "id": "eval_fraud_gate_control_001",
+    "pair_id": "eval_fraud_gate_001",
+    "split": "evaluation",
+    "category": "control_bypass",
+    "domain": "fraud_controls",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["transaction", "fraud_check", "review", "settlement", "audit"],
+      "edges": [
+        ["transaction", "fraud_check"],
+        ["fraud_check", "review"],
+        ["review", "settlement"]
+      ]
+    },
+    "after": {
+      "entities": ["transaction", "fraud_check", "review", "settlement", "audit"],
+      "edges": [
+        ["transaction", "fraud_check"],
+        ["fraud_check", "review"],
+        ["review", "settlement"],
+        ["fraud_check", "audit"]
+      ]
+    }
+  },
+  {
+    "id": "eval_fraud_gate_mutation_001",
+    "pair_id": "eval_fraud_gate_001",
+    "split": "evaluation",
+    "category": "control_bypass",
+    "domain": "fraud_controls",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["transaction", "fraud_check", "review", "settlement", "audit"],
+      "edges": [
+        ["transaction", "fraud_check"],
+        ["fraud_check", "review"],
+        ["review", "settlement"]
+      ]
+    },
+    "after": {
+      "entities": ["transaction", "review"],
+      "edges": [
+        ["transaction", "review"]
+      ]
+    }
+  },
+
+  {
+    "id": "eval_key_authority_control_001",
+    "pair_id": "eval_key_authority_001",
+    "split": "evaluation",
+    "category": "authority_route",
+    "domain": "key_management",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["request", "security_director", "authorization", "master_key", "audit"],
+      "edges": [
+        ["request", "security_director"],
+        ["security_director", "authorization"],
+        ["authorization", "master_key"]
+      ]
+    },
+    "after": {
+      "entities": ["request", "security_director", "authorization", "master_key", "audit"],
+      "edges": [
+        ["request", "security_director"],
+        ["security_director", "authorization"],
+        ["authorization", "master_key"],
+        ["authorization", "audit"]
+      ]
+    }
+  },
+  {
+    "id": "eval_key_authority_mutation_001",
+    "pair_id": "eval_key_authority_001",
+    "split": "evaluation",
+    "category": "authority_route",
+    "domain": "key_management",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["request", "security_director", "authorization", "master_key", "audit"],
+      "edges": [
+        ["request", "security_director"],
+        ["security_director", "authorization"],
+        ["authorization", "master_key"]
+      ]
+    },
+    "after": {
+      "entities": ["request", "authorization", "master_key", "audit"],
+      "edges": [
+        ["request", "authorization"],
+        ["authorization", "master_key"],
+        ["authorization", "audit"]
+      ]
+    }
+  },
+
+  {
+    "id": "eval_release_gate_control_001",
+    "pair_id": "eval_release_gate_001",
+    "split": "evaluation",
+    "category": "approval_chain",
+    "domain": "software_security",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["artifact", "scanner", "approval", "release", "metrics"],
+      "edges": [
+        ["artifact", "scanner"],
+        ["scanner", "approval"],
+        ["approval", "release"]
+      ]
+    },
+    "after": {
+      "entities": ["artifact", "scanner", "approval", "release", "metrics"],
+      "edges": [
+        ["artifact", "scanner"],
+        ["scanner", "approval"],
+        ["approval", "release"],
+        ["scanner", "metrics"]
+      ]
+    }
+  },
+  {
+    "id": "eval_release_gate_mutation_001",
+    "pair_id": "eval_release_gate_001",
+    "split": "evaluation",
+    "category": "approval_chain",
+    "domain": "software_security",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["artifact", "scanner", "approval", "release", "metrics"],
+      "edges": [
+        ["artifact", "scanner"],
+        ["scanner", "approval"],
+        ["approval", "release"]
+      ]
+    },
+    "after": {
+      "entities": ["artifact", "release", "metrics"],
+      "edges": [
+        ["artifact", "release"],
+        ["artifact", "metrics"]
+      ]
+    }
+  },
+
+  {
+    "id": "eval_agent_dependency_control_001",
+    "pair_id": "eval_agent_dependency_001",
+    "split": "evaluation",
+    "category": "dependency_rewire",
+    "domain": "ai_platform",
+    "difficulty": "hard",
+    "consequential_change": false,
+    "critical_change": false,
+    "before": {
+      "entities": ["source", "chunk", "index", "agent", "telemetry"],
+      "edges": [
+        ["source", "chunk"],
+        ["chunk", "index"],
+        ["index", "agent"]
+      ]
+    },
+    "after": {
+      "entities": ["source", "chunk", "index", "agent", "telemetry"],
+      "edges": [
+        ["source", "chunk"],
+        ["chunk", "index"],
+        ["index", "agent"],
+        ["index", "telemetry"]
+      ]
+    }
+  },
+  {
+    "id": "eval_agent_dependency_mutation_001",
+    "pair_id": "eval_agent_dependency_001",
+    "split": "evaluation",
+    "category": "dependency_rewire",
+    "domain": "ai_platform",
+    "difficulty": "hard",
+    "consequential_change": true,
+    "critical_change": true,
+    "before": {
+      "entities": ["source", "chunk", "index", "agent", "telemetry"],
+      "edges": [
+        ["source", "chunk"],
+        ["chunk", "index"],
+        ["index", "agent"]
+      ]
+    },
+    "after": {
+      "entities": ["source", "chunk", "index", "agent", "telemetry"],
+      "edges": [
+        ["source", "chunk"],
+        ["chunk", "agent"],
+        ["index", "telemetry"]
+      ]
+    }
+  }
+]

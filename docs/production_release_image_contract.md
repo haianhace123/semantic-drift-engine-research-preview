@@ -1,0 +1,27 @@
+# Production release image contract
+
+## Decision
+
+The development Compose file (`docker-compose.yml`) remains convenient for local builds. The production override (`docker-compose.prod.yml`) **must never compile application services from the checked-out working tree**. Every app service and operator maintenance job references the same explicitly supplied, previously validated `SDE_RELEASE_IMAGE`, with `pull_policy: never`. The override removes inherited `build:` instructions. DB, Redis and Caddy retain their separately pinned base images. This is one application image with distinct entrypoints, **not** one giant running process.
+
+`SDE_RELEASE_IMAGE` is mandatory whenever the production override is resolved. Provide a unique local candidate tag only in controlled integration environments; for real deployments prefer a registry reference pinned by a manifest digest after the image has been published and verified. A local Docker image ID is not interchangeable with a registry's manifest digest. Keep the Git commit, registry digest, migration manifest and knowledge backup identity in the release record; do not create multiple independent authorities for the same revision.
+
+## Required deployment checks
+
+1. Verify source-to-image provenance, the image digest/ID and release metadata from an external record. Verify fresh live knowledge backup, isolated restore, plus an independently protected encrypted copy **outside the Docker host**. Ten historical missing raw artifacts remain a documented evidence deficit.
+2. Resolve `docker compose --profile semantic-recovery --profile email --profile maintenance --profile volume-bootstrap -f docker-compose.yml -f docker-compose.prod.yml config --format json` with `SDE_RELEASE_IMAGE` set; all four profiles are needed to inspect optional application, bootstrap and maintenance roles in the rendered configuration. Check every application role has no `build`, one agreed image and no unexpected changes in env, mounts, ports or networks. This is **a validation-only command**; do not enable maintenance or other optional profiles in a production `up` operation by copying it blindly. **Do not use the production override against the current development localhost project without explicitly reviewing the ingress, network and profile changes.**
+3. Fence all ingress/external writers. Confirm quiescence; stop existing DB-writing services. The database already has migration 049, so **do not reapply migrations** by habit. Check compatibility in a disposable environment and on `/ready` before reopening traffic. The previous API image is not resolvable in the local image store; recreating the previous containers may make recovery impossible.
+4. Perform an explicitly scoped image-only cutover. Do not run `docker compose up --build`, run `runtime_volume_init`, recreate DB/Redis, delete volumes or prune images. Keep a separate recovery runbook for restoring the same candidate release plus verified knowledge bundle to isolated infrastructure (roll-forward recovery), not unproven old-binary rollback.
+5. After cutover, verify schema preflight, `/ready`, worker heartbeat, source ingestion, downstream admission, tenant boundaries and event processing. If acceptance fails, fence ingress and use the pre-approved recovery path; **do not** blindly restart the obsolete API image on migration 049.
+
+## Scope limit
+
+This patch makes future production image selection deterministic and refuses implicit build. It **does not** upgrade or modify any running container, verify off-host storage, recover missing raw artifacts, or authorize a rollout. It does not replace the isolated R0.9 backup/restore evidence. Any actual production rollout needs a separate operator-controlled downtime decision and an independently protected recovery copy.
+
+## Recursive volume permission initializer: only for deliberate provisioning
+
+Production keeps `runtime_volume_init` as a separate, explicitly profiled **volume-bootstrap** job for fresh-volume provisioning. It runs as root and recursively chowns backup and snapshot volumes; on an existing evidence volume that could be expensive or disrupt integrity. **Do not enable the volume-bootstrap profile during deployment** or an image-only cutover. Any use of the bootstrap requires separate operator approval and a verified empty/new volume provisioning plan; it is not a normal release prerequisite. In particular, `docker compose up --build` and commands enabling all profiles are not safe deployment commands.
+
+Production Compose replaces `depends_on` for `api`, `vector_worker`, `crawler_scheduler` and `semantic_recovery_worker` to preserve healthy DB/Redis ordering **without** launching `runtime_volume_init`. The overlay uses `!override` and therefore **requires Docker Compose 2.24.4 or later**; earlier implementations must fail the Compose-config preflight, not fall back to an unguarded deployment. The normal development Compose file deliberately retains its existing initialization flow.
+
+The profile-enabling command in the validation section above is **validation only**, never copy it into `up`. For a production preflight, also resolve the default profiles and assert `runtime_volume_init` is **absent** from the default service set, with DB/Redis health dependencies unchanged. Validate the exact running project's config and volume ownership separately before any live transition. This patch does not change existing containers, data or runtime image identities.

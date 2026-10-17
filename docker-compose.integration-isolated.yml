@@ -1,0 +1,95 @@
+# Dedicated integration-test stack. Always run with a unique Compose project name.
+# No host ports, production volumes, credentials, or application workers are attached.
+services:
+  db:
+    image: pgvector/pgvector:pg15@sha256:a947c45cdc5906a1bc951f20a8709e321256343ee0f251e4ae00b5e7def4e6da
+    restart: "no"
+    environment:
+      POSTGRES_DB: sde_integration
+      POSTGRES_USER: sde_integration
+      POSTGRES_PASSWORD: sde_local_test_only
+    volumes:
+      - integration_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sde_integration -d sde_integration"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  integration_downstream_db:
+    image: pgvector/pgvector:pg15@sha256:a947c45cdc5906a1bc951f20a8709e321256343ee0f251e4ae00b5e7def4e6da
+    restart: "no"
+    environment:
+      POSTGRES_DB: downstream_test
+      POSTGRES_USER: downstream_test
+      POSTGRES_PASSWORD: downstream_test
+    volumes:
+      - integration_downstream_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U downstream_test -d downstream_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  redis:
+    image: redis:7@sha256:c6eabf748fc7a61dbb5a705c78bcf3d6377b1127a97d0ce965c11c44ba46896f
+    restart: "no"
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 3s
+
+  api:
+    # Dedicated HTTP boundary. Only reachable within this disposable project.
+    image: semantic_drift_engine-api:latest
+    restart: "no"
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql://sde_integration:sde_local_test_only@db:5432/sde_integration
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: sde-local-integration-only-secret-not-for-deployment
+      COOKIE_SECURE: "false"
+      SDE_EMAIL_WORKER_EXPECTED: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3).close()"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  tests:
+    # Reuse the API image built from the current source. It excludes .env.
+    # Rebuild that image after modifying source before invoking the runner.
+    image: semantic_drift_engine-api:latest
+    restart: "no"
+    environment:
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql://sde_integration:sde_local_test_only@db:5432/sde_integration
+      TEST_DATABASE_URL: postgresql://sde_integration:sde_local_test_only@db:5432/sde_integration
+      REDIS_URL: redis://redis:6379/0
+      RUN_DB_INTEGRATION_TESTS: "1"
+      RUN_AUTH_INTEGRATION_TESTS: "1"
+      SDE_LINEAGE_ACCEPTANCE_API_URL: http://api:8000
+      SECRET_KEY: sde-local-integration-only-secret-not-for-deployment
+      COOKIE_SECURE: "false"
+      SDE_EMAIL_WORKER_EXPECTED: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  integration_pg_data:
+  integration_downstream_pg_data:

@@ -1,0 +1,75 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# Python environments: include named review/test venvs, not only .venv/
+.venv*/
+**/.venv*/
+venv/
+env/
+
+# Test and coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Build artifacts
+build/
+dist/
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+*.egg-info/
+
+# Runtime state
+logs/
+*.log
+backups/
+*.pid
+*.pid.lock
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Project-local generated data
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# IDE and OS metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local audit and scratch artifacts
+*_audit.txt
+*_review.txt
+*_review.diff
+*_audit.diff
+*_run.txt
+phase*.txt
+phase*.diff

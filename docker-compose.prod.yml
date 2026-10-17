@@ -1,0 +1,167 @@
+services:
+  api:
+    # Never build application code from a deployment working tree.
+    # Replace inherited initializer dependency; preserve DB/Redis readiness.
+    depends_on: !override
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    entrypoint: ["python", "-m", "scripts.schema_preflight", "--"]
+    environment:
+      ENVIRONMENT: production
+      COOKIE_SECURE: "true"
+      COOKIE_SAMESITE: lax
+      APP_BASE_URL: https://${APP_DOMAIN}
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:?Set exact Caddy proxy IP; CIDR and wildcard are unsupported by pinned Uvicorn}
+    ports: !reset []
+    expose:
+      - "8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready', timeout=5)"
+    restart: always
+    networks:
+      - backend
+
+  # Production maintenance must share only the private DB network; it is
+  # still disabled unless an operator explicitly selects its profile.
+  backup_maintenance:
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    networks:
+      - backend
+
+  knowledge_backup_maintenance:
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    networks:
+      - backend
+
+  db:
+    restart: always
+    networks:
+      - backend
+
+  redis:
+    restart: always
+    networks:
+      - backend
+
+  runtime_volume_init:
+    # Explicit fresh-volume bootstrap only. No production app service depends on
+    # this recursive-chown workload; deployment must not run it implicitly.
+    profiles:
+      - volume-bootstrap
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+
+  vector_worker:
+    # Never build application code from a deployment working tree.
+    # Replace inherited initializer dependency; preserve DB/Redis readiness.
+    depends_on: !override
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    entrypoint: ["python", "-m", "scripts.schema_preflight", "--"]
+    restart: always
+    networks:
+      - backend
+
+  alert_delivery_worker:
+    # Never build application code from a deployment working tree.
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    entrypoint: ["python", "-m", "scripts.schema_preflight", "--"]
+    restart: always
+    networks:
+      - backend
+
+  email_worker:
+    # Never build application code from a deployment working tree.
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    restart: always
+    networks:
+      - backend
+
+  crawler_scheduler:
+    # Never build application code from a deployment working tree.
+    # Replace inherited initializer dependency; preserve DB/Redis readiness.
+    depends_on: !override
+      db:
+        condition: service_healthy
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    entrypoint: ["python", "-m", "scripts.schema_preflight", "--"]
+    restart: always
+    networks:
+      - backend
+
+  lineage_invalidation_executor:
+    # Never build application code from a deployment working tree.
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    entrypoint: ["python", "-m", "scripts.schema_preflight", "--"]
+    restart: always
+    networks:
+      - backend
+
+  semantic_recovery_worker:
+    # Never build application code from a deployment working tree.
+    # Replace inherited initializer dependency; preserve DB/Redis readiness.
+    depends_on: !override
+      db:
+        condition: service_healthy
+    build: !reset null
+    image: ${SDE_RELEASE_IMAGE:?SDE_RELEASE_IMAGE is required}
+    pull_policy: never
+    entrypoint: ["python", "-m", "scripts.schema_preflight", "--"]
+
+  caddy:
+    image: caddy:2@sha256:0c994536bddb66445885237f1a5dcc1916bccea922661c76b4e9fc24061f9b52
+    restart: always
+
+    depends_on:
+      api:
+        condition: service_healthy
+
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+      TLS_EMAIL: ${TLS_EMAIL}
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+    networks:
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  backend:
+    driver: bridge

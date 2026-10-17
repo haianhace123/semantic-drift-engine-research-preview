@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>Review account linking - Semantic Drift Engine</title>
+  <link rel="stylesheet" href="/dashboard/app/public-fonts.css">
+  <link rel="stylesheet" href="/dashboard/css/auth.css">
+  <link rel="icon" type="image/svg+xml" href="/dashboard/assets/brand/logo.svg">
+</head>
+<body class="auth-page">
+  <main class="auth-layout" id="oauthLinkCard">
+    <section class="auth-context" aria-label="Semantic Drift Engine">
+      <a class="auth-brand" href="/login.html" aria-label="Semantic Drift Engine sign in">
+        <span class="auth-brand-mark" aria-hidden="true">
+          <img src="/dashboard/assets/brand/logo.svg" alt="" width="36" height="36">
+        </span>
+        <span class="auth-brand-copy">
+          <strong>Semantic Drift Engine</strong>
+          <small>Knowledge integrity</small>
+        </span>
+      </a>
+      <div class="auth-context-body">
+        <div class="auth-kicker">ACCOUNT SECURITY</div>
+        <h1 class="auth-context-title">Verify the identity you are linking.</h1>
+        <p class="auth-context-copy">
+          Connecting an identity provider can give that provider access to your
+          existing account. Review the exact account and provider before proceeding.
+        </p>
+        <div class="auth-capability-list" aria-label="Account linking safeguards">
+          <div><span>01</span><p>Confirm the existing account</p></div>
+          <div><span>02</span><p>Check the identity provider</p></div>
+          <div><span>03</span><p>Approve or cancel the link</p></div>
+        </div>
+      </div>
+      <footer class="auth-context-footer">
+        <span>KNOWLEDGE CONTROL PLANE</span>
+        <span>SDE / AUTH</span>
+      </footer>
+    </section>
+    <section class="auth-stage" aria-labelledby="linkTitle">
+      <div class="auth-panel">
+        <div class="auth-mobile-brand">
+          <span class="auth-brand-mark" aria-hidden="true">
+            <img src="/dashboard/assets/brand/logo.svg" alt="" width="36" height="36">
+          </span>
+          <span>Knowledge integrity</span>
+        </div>
+        <header class="auth-panel-header">
+          <div class="auth-eyebrow">IDENTITY CONFIRMATION</div>
+          <h2 id="linkTitle">Link identity provider</h2>
+          <p>Only continue if you recognize both the account and provider shown below.</p>
+        </header>
+        <div id="error" class="auth-message auth-message-error" role="alert" aria-live="assertive"></div>
+        <div id="success" class="auth-message auth-message-success" role="status" aria-live="polite"></div>
+        <dl class="auth-link-details" aria-label="Pending account link">
+          <div><dt>Existing account</dt><dd id="linkEmail">Checking account…</dd></div>
+          <div><dt>Provider</dt><dd id="linkProvider">Checking provider…</dd></div>
+        </dl>
+        <p class="auth-link-advisory">
+          Linking changes sign-in access for this account. If you did not start
+          this request, cancel it.
+        </p>
+        <div class="auth-link-actions">
+          <button id="confirmLinkBtn" class="auth-primary-button" type="button" disabled>
+            Link account
+          </button>
+          <button id="cancelLinkBtn" class="auth-secondary-button" type="button">Cancel</button>
+        </div>
+        <div class="auth-switch">
+          <span>Not your account?</span>
+          <a href="/login.html">Return to sign in</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="/dashboard/js/auth-pages.js" defer></script>
+</body>
+</html>

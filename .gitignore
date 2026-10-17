@@ -1,0 +1,76 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python environments, including named local review/test environments
+.venv*/
+venv/
+env/
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Type checker and linter caches
+.mypy_cache/
+.pyright/
+.ruff_cache/
+
+# Build and packaging artifacts
+build/
+dist/
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+*.egg-info/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Runtime logs
+logs/
+*.log
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Runtime process files
+*.pid
+*.pid.lock
+
+# Project data
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+backups/
+
+# Local audit and scratch artifacts
+*_audit.txt
+*_review.txt
+*_review.diff
+*_audit.diff
+*_run.txt
+phase*.txt
+phase*.diff

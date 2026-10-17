@@ -1,0 +1,63 @@
+# Separate, disposable recovery drill. NEVER merge this file with the live Compose stack.
+# The sole existing resource attached is a READ-ONLY backup volume explicitly named
+# by the operator. No .env credentials, host ports or live application volumes.
+services:
+  restore_db:
+    image: pgvector/pgvector:pg15@sha256:a947c45cdc5906a1bc951f20a8709e321256343ee0f251e4ae00b5e7def4e6da
+    restart: "no"
+    environment:
+      POSTGRES_DB: sde_restore_drill
+      POSTGRES_USER: sde_restore
+      POSTGRES_PASSWORD: sde_local_restore_only
+    volumes:
+      - restore_pg_data:/var/lib/postgresql/data
+    networks:
+      - restore_private
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sde_restore -d sde_restore_drill"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+
+  restore_runner:
+    # Disposable runner uses an approved image already present on the host.
+    # Do not rebuild or pull during a customer-data restore drill.
+    image: ${SDE_RESTORE_IMAGE:-semantic_drift_engine-api:latest}
+    pull_policy: never
+    restart: "no"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    environment:
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql://sde_restore:sde_local_restore_only@restore_db:5432/sde_restore_drill
+      SDE_RESTORE_PROJECT: ${COMPOSE_PROJECT_NAME:?Use an explicit -p sde-restore-* project}
+      SDE_RESTORE_BUNDLE_ID: ${SDE_RESTORE_BUNDLE_ID:?Select an existing knowledge bundle ID}
+      SDE_RESTORE_BACKUP_ROOT: /app/source-backups/knowledge-bundles
+      SDE_RESTORE_SNAPSHOT_ROOT: /app/data/raw
+    command: ["python", "-m", "scripts.restore_knowledge_state_isolated"]
+    volumes:
+      - source_backups:/app/source-backups:ro
+      - restore_snapshot_data:/app/data
+    tmpfs:
+      - /tmp
+    networks:
+      - restore_private
+    depends_on:
+      restore_db:
+        condition: service_healthy
+
+volumes:
+  # Existing live backup volume can only be read from this isolated stack.
+  source_backups:
+    external: true
+    name: ${SDE_RESTORE_SOURCE_BACKUP_VOLUME:?Specify the read-only source backup volume}
+  restore_pg_data:
+  restore_snapshot_data:
+
+networks:
+  restore_private:
+    internal: true

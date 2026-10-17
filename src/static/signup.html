@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Create account - Semantic Drift Engine</title>
+
+  <link rel="stylesheet" href="/dashboard/app/public-fonts.css">
+  <link
+    rel="stylesheet"
+    href="/dashboard/css/auth.css"
+  >
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="/dashboard/assets/brand/logo.svg"
+  >
+</head>
+
+<body class="auth-page">
+
+  <main class="auth-layout">
+
+    <section
+      class="auth-context"
+      aria-label="Semantic Drift Engine"
+    >
+
+      <a
+        class="auth-brand"
+        href="/login.html"
+        aria-label="Semantic Drift Engine"
+      >
+        <span class="auth-brand-mark" aria-hidden="true">
+          <img
+            src="/dashboard/assets/brand/logo.svg"
+            alt=""
+            width="36"
+            height="36"
+          >
+        </span>
+
+        <span class="auth-brand-copy">
+            <strong>Semantic Drift Engine</strong>
+            <small>Knowledge integrity</small>
+        </span>
+      </a>
+
+
+      <div class="auth-context-body">
+
+        <div class="auth-kicker">
+          KNOWLEDGE CONTROL PLANE
+        </div>
+
+        <h1 class="auth-context-title">
+          Build memory
+          <span>that understands change.</span>
+        </h1>
+
+        <p class="auth-context-copy">
+          Create your workspace to monitor semantic drift,
+          replay historical knowledge states, and surface
+          downstream risk across your AI knowledge systems.
+        </p>
+
+
+        <div class="auth-capability-list" aria-label="Product capabilities">
+          <div><span>01</span><p>Capture document revisions</p></div>
+          <div><span>02</span><p>Review qualified semantic evidence</p></div>
+          <div><span>03</span><p>Trace recorded downstream dependencies</p></div>
+        </div>
+
+      </div>
+
+
+      <footer class="auth-context-footer">
+        <span>
+          TEMPORAL WORKSPACE
+        </span>
+
+        <span>
+          SDE / SIGNUP
+        </span>
+      </footer>
+
+    </section>
+
+
+    <section class="auth-stage">
+
+      <div class="auth-panel">
+
+        <div class="auth-mobile-brand">
+          <span class="auth-brand-mark" aria-hidden="true">
+            <img
+              src="/dashboard/assets/brand/logo.svg"
+              alt=""
+              width="36"
+              height="36"
+            >
+          </span>
+
+          <span>
+            Knowledge integrity
+          </span>
+        </div>
+
+
+        <header
+          id="signupHeader"
+          class="auth-panel-header"
+        >
+
+          <div class="auth-eyebrow">
+            CREATE WORKSPACE
+          </div>
+
+          <h2>
+            Create account
+          </h2>
+
+          <p>
+            Start monitoring the knowledge your AI depends on.
+          </p>
+
+        </header>
+
+
+        <div
+          id="error"
+          class="auth-message auth-message-error"
+          role="alert"
+          aria-live="polite"
+        ></div>
+
+        <div
+          id="success"
+          class="auth-message auth-message-success"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+
+        <section id="signupStage">
+
+          <div class="auth-oauth-grid">
+
+            <button
+              id="googleBtn"
+              class="auth-oauth-button"
+              type="button"
+            >
+              <span
+                class="auth-oauth-icon"
+                aria-hidden="true"
+              >
+                <img
+                  src="/dashboard/assets/auth/google.svg"
+                  alt=""
+                >
+              </span>
+
+              <span data-oauth-label>
+                Continue with Google
+              </span>
+            </button>
+
+            <button
+              id="githubBtn"
+              class="auth-oauth-button"
+              type="button"
+            >
+              <span
+                class="auth-oauth-icon"
+                aria-hidden="true"
+              >
+                <img
+                  src="/dashboard/assets/auth/github.svg"
+                  alt=""
+                >
+              </span>
+
+              <span data-oauth-label>
+                Continue with GitHub
+              </span>
+            </button>
+
+          </div>
+
+
+          <div class="auth-divider">
+            <span>
+              or use email
+            </span>
+          </div>
+
+
+          <form
+            id="signupForm"
+            class="auth-form"
+            novalidate
+          >
+
+            <div class="auth-field">
+
+              <div class="auth-field-head">
+                <label for="fullName">
+                  Full name
+                </label>
+              </div>
+
+              <input
+                id="fullName"
+                class="auth-input"
+                type="text"
+                autocomplete="name"
+                maxlength="255"
+                placeholder="Your name"
+              >
+
+            </div>
+
+
+            <div class="auth-field">
+
+              <div class="auth-field-head">
+                <label for="email">
+                  Work email
+                </label>
+              </div>
+
+              <input
+                id="email"
+                class="auth-input"
+                type="email"
+                autocomplete="email"
+                inputmode="email"
+                spellcheck="false"
+                placeholder="you@company.com"
+                aria-describedby="emailHint"
+                required
+              >
+
+              <div
+                id="emailHint"
+                class="auth-field-hint"
+                aria-live="polite"
+              ></div>
+
+            </div>
+
+
+            <div class="auth-field">
+
+              <div class="auth-field-head">
+                <label for="password">
+                  Password
+                </label>
+              </div>
+
+              <div class="auth-password-wrap">
+
+                <input
+                  id="password"
+                  class="auth-input"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="At least 12 characters"
+                  required
+                >
+
+                <button
+                  type="button"
+                  class="auth-password-toggle"
+                  data-toggle-password="password"
+                  aria-label="Show password"
+                >
+                  Show
+                </button>
+
+              </div>
+
+
+              <div
+                id="passwordStrengthMeter"
+                class="auth-strength"
+                data-score="0"
+              >
+
+                <div class="auth-strength__track">
+                  <span class="auth-strength__segment"></span>
+                  <span class="auth-strength__segment"></span>
+                  <span class="auth-strength__segment"></span>
+                  <span class="auth-strength__segment"></span>
+                  <span class="auth-strength__segment"></span>
+                </div>
+
+                <div
+                  id="passwordStrength"
+                  class="auth-strength__label"
+                  aria-live="polite"
+                >
+                  Use 12+ characters with uppercase, lowercase,
+                  a number and a symbol.
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="auth-field">
+
+              <div class="auth-field-head">
+                <label for="confirmPassword">
+                  Confirm password
+                </label>
+              </div>
+
+              <div class="auth-password-wrap">
+
+                <input
+                  id="confirmPassword"
+                  class="auth-input"
+                  type="password"
+                  autocomplete="new-password"
+                  placeholder="Repeat your password"
+                  required
+                >
+
+                <button
+                  type="button"
+                  class="auth-password-toggle"
+                  data-toggle-password="confirmPassword"
+                  aria-label="Show password"
+                >
+                  Show
+                </button>
+
+              </div>
+
+              <div
+                id="confirmHint"
+                class="auth-field-hint"
+                aria-live="polite"
+              ></div>
+
+            </div>
+
+
+            <label class="auth-check auth-terms">
+
+              <input
+                id="termsAccepted"
+                type="checkbox"
+                required
+              >
+
+              <span>
+                I agree to the
+                <a href="/terms.html">Terms of Service</a>
+                and
+                <a href="/privacy.html">Privacy Policy</a>.
+              </span>
+
+            </label>
+
+
+            <button
+              class="auth-primary-button"
+              id="signupBtn"
+              type="submit"
+            >
+              Create account
+            </button>
+
+          </form>
+
+        </section>
+
+
+        <section
+          id="verifyPanel"
+          class="auth-verify"
+          aria-labelledby="verifyTitle"
+        >
+
+          <div class="auth-eyebrow">
+            VERIFY IDENTITY
+          </div>
+
+          <h2
+            id="verifyTitle"
+            class="auth-verify-title"
+          >
+            Check your email
+          </h2>
+
+          <p class="auth-verify-meta">
+            Verification codes are delivered by email to
+            <strong id="verifyEmail"></strong>.
+          </p>
+
+
+          <form
+            id="verifyForm"
+            class="auth-form"
+            novalidate
+          >
+
+            <div class="auth-field">
+
+              <label
+                class="auth-label"
+                for="verificationCode"
+              >
+                Verification code
+              </label>
+
+              <input
+                id="verificationCode"
+                class="auth-code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                placeholder="000000"
+                aria-describedby="verifyCodeHint"
+                required
+              >
+
+              <div
+                id="verifyCodeHint"
+                class="auth-field-hint"
+              >
+                Enter the six digits from your email.
+              </div>
+
+            </div>
+
+
+            <button
+              class="auth-primary-button"
+              id="verifyBtn"
+              type="submit"
+            >
+              Verify email
+            </button>
+
+          </form>
+
+
+          <div class="auth-inline-actions">
+
+            <button
+              id="resendVerificationBtn"
+              class="auth-text-button"
+              type="button"
+              disabled
+            >
+              Resend code
+            </button>
+
+            <span
+              id="resendStatus"
+              class="auth-status"
+              aria-live="polite"
+            >
+              Resend available in 60s
+            </span>
+
+          </div>
+
+
+          <div class="auth-switch">
+
+            <span>
+              Already verified?
+            </span>
+
+            <a href="/login.html">
+              Sign in
+            </a>
+
+          </div>
+
+        </section>
+
+
+        <div
+          id="signupFooter"
+          class="auth-switch"
+        >
+          <span>
+            Already have an account?
+          </span>
+
+          <a href="/login.html">
+            Sign in
+          </a>
+        </div>
+
+
+        <footer
+          id="signupLegal"
+          class="auth-panel-footer"
+        >
+          Authentication is protected by secure,
+          server-managed session cookies.
+        </footer>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script
+    src="/dashboard/js/auth-pages.js"
+  ></script>
+
+</body>
+</html>

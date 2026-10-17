@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "dataset_id": "synthetic_example_not_a_holdout",
+  "source_type": "internal",
+  "annotation_protocol_id": "blind_review_v1",
+  "cases": [
+    {
+      "case_id": "synthetic_refund_window",
+      "domain": "eligibility",
+      "change_category": "numeric_deadline",
+      "rights_basis": "internal_authorized",
+      "source_reference": "synthetic_example_no_external_source",
+      "old_text": "Returns are accepted within 30 days.",
+      "new_text": "Returns are accepted within 7 days."
+    },
+    {
+      "case_id": "synthetic_paraphrase",
+      "domain": "eligibility",
+      "change_category": "paraphrase",
+      "rights_basis": "internal_authorized",
+      "source_reference": "synthetic_example_no_external_source",
+      "old_text": "Subscribers may end their plan at any time.",
+      "new_text": "A subscriber can cancel the plan whenever they choose."
+    }
+  ]
+}

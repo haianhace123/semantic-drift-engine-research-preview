@@ -1,0 +1,4 @@
+# Optional LangChain/PGVector dependencies for the dedicated CI acceptance gate.
+# These are not installed in the production API image.
+langchain-postgres==0.0.18
+websockets==14.2
